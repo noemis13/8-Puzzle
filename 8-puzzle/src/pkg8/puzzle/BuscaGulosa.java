@@ -2,6 +2,7 @@ package pkg8.puzzle;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -213,63 +214,72 @@ public class BuscaGulosa {
         }
 
         System.out.println("heuristica antes: " + peçasForaDoLugar);
-        
+
         //-------------------------------------------------------------------------
         //valores da heuristica iguais
         int tamPeçasForaDoLugar = peçasForaDoLugar.size();
         int valorIgual, novoValorHeuristica;
+        ArrayList<String[][]> puzzleHeuristicaIguais = new ArrayList<>();
+        ArrayList<Integer> novaHeuristica = new ArrayList<>();
 
         if (tamPeçasForaDoLugar == 1) {
             menorValorHeuristica = encontraMenor(peçasForaDoLugar);
+            puzzle = encontraPuzzle(puzzleFilhos, menorValorHeuristica);
 
         } else if (tamPeçasForaDoLugar == 2) {
             //verifica se é uma lista de valores iguais ou nao
             valorIgual = verificaIgualdadeHeuristica(peçasForaDoLugar, tamPeçasForaDoLugar);
-            //lista nao igual
             if (valorIgual == 1) {
                 menorValorHeuristica = encontraMenor(peçasForaDoLugar);
+                puzzle = encontraPuzzle(puzzleFilhos, menorValorHeuristica);
 
             } else {
                 //descobre o puzzle e expande
-                novoValorHeuristica = expandePuzzleDeMesmaHeuristica(valorIgual, puzzleFilhos, puzzlePercorrido);
+                puzzleHeuristicaIguais = encontraPuzzleDeMesmaHeuristica(valorIgual, puzzleFilhos);
+                novaHeuristica = expandePuzzleDeMesmaHeuristica(valorIgual, puzzleHeuristicaIguais, puzzlePercorrido);
+                peçasForaDoLugar = substituiPeçasForaDoLugar(peçasForaDoLugar, valorIgual, novaHeuristica);
+
+                novoValorHeuristica = encontraMenor(peçasForaDoLugar);
                 menorValorHeuristica = novoValorHeuristica;
+
+                puzzle = encontraPuzzle(puzzleHeuristicaIguais, menorValorHeuristica);
             }
 
         } else if (tamPeçasForaDoLugar >= 3) {
             valorIgual = verificaIgualdadeHeuristica(peçasForaDoLugar, tamPeçasForaDoLugar);
             if (valorIgual == 1) {
                 menorValorHeuristica = encontraMenor(peçasForaDoLugar);
+                puzzle = encontraPuzzle(puzzleFilhos, menorValorHeuristica);
 
             } else {
                 int valorDiferente;
                 valorDiferente = encontraValorDiferente(peçasForaDoLugar, valorIgual);
-                if(valorDiferente < valorIgual) {
+                if (valorDiferente < valorIgual) {
                     menorValorHeuristica = valorDiferente;
-                
-                }else{
-                    novoValorHeuristica = expandePuzzleDeMesmaHeuristica(valorIgual, puzzleFilhos, puzzlePercorrido);
+                    puzzle = encontraPuzzle(puzzleFilhos, menorValorHeuristica);
+
+                } else {
+                    //novoValorHeuristica = expandePuzzleDeMesmaHeuristica(valorIgual, puzzleFilhos);
+                    puzzleHeuristicaIguais = encontraPuzzleDeMesmaHeuristica(valorIgual, puzzleFilhos);
+                    novaHeuristica = expandePuzzleDeMesmaHeuristica(valorIgual, puzzleHeuristicaIguais, puzzlePercorrido);
+                    peçasForaDoLugar = substituiPeçasForaDoLugar(peçasForaDoLugar, valorIgual, novaHeuristica);
+
+                    novoValorHeuristica = encontraMenor(peçasForaDoLugar);
                     //valor diferente melhor que novo valor encontrado
-                    if(novoValorHeuristica < valorDiferente) {
+                    if (novoValorHeuristica < valorDiferente) {
                         menorValorHeuristica = novoValorHeuristica;
-                    }else {
+
+                    } else {
                         menorValorHeuristica = valorDiferente;
                     }
-                    
+                    puzzle = encontraPuzzle(puzzleHeuristicaIguais, menorValorHeuristica);                        
                 }
             }
         }
 
         //-------------------------------------------------------------------------
-        System.out.println("Heuristica sem repetição: " + peçasForaDoLugar);
+        System.out.println("NOVA HEURISTUCA " + peçasForaDoLugar);
 
-        //descobrir a qual matriz o menor valor pertenece
-        for (String[][] pf : puzzleFilhos) {
-            peçasFLugar = calculaPecasForaDoLugar(pf);
-            if (peçasFLugar == menorValorHeuristica) {
-                puzzle = pf;
-                break;
-            }
-        }
         //adiciona o que ja foi percorrido;
         puzzlePercorrido.add(puzzle);
 
@@ -284,7 +294,7 @@ public class BuscaGulosa {
 
         if (ehPuzzleFInal == 0) {
             metodos.imprimePuzzle(puzzle);
-            //System.out.println("valor heuristica" + menorValorHeuristica);
+            System.out.println("valor heuristica" + menorValorHeuristica);
             System.out.println("\n");
             expandePuzzle(puzzle, puzzlePercorrido);
         } else {
@@ -312,9 +322,8 @@ public class BuscaGulosa {
 
     /*
     Método responsável por encontrar a matriz no qual existe o valor heuristica igual
-    expandir essa matriz e retornar um novo valor aplicável.
      */
-    public int expandePuzzleDeMesmaHeuristica(int valorIgual, ArrayList<String[][]> puzzleFilhos, ArrayList<String[][]> puzzlePercorrido) {
+    public ArrayList<String[][]> encontraPuzzleDeMesmaHeuristica(int valorIgual, ArrayList<String[][]> puzzleFilhos) {
         //encontrar o puzzle para o valorIgual
         ArrayList<String[][]> puzzleHeuristicaIguais = new ArrayList<>();
 
@@ -324,7 +333,15 @@ public class BuscaGulosa {
                 puzzleHeuristicaIguais.add(pf);
             }
         }
-        
+
+        return puzzleHeuristicaIguais;
+    }
+
+    /*
+    Método responsável por encontrar a matriz no qual existe o valor heuristica igual
+    expandir essa matriz e retornar um novo valor aplicável.
+     */
+    public ArrayList<Integer> expandePuzzleDeMesmaHeuristica(int valorIgual, ArrayList<String[][]> puzzleHeuristicaIguais, ArrayList<String[][]> puzzlePercorrido) {
         //Expandir os puzzle encontrados
         ExpandePuzzleHeuristicaIgual expandePuzzleHeuristicaIgual = new ExpandePuzzleHeuristicaIgual();
         ArrayList<Integer> novoValorHeuristica = new ArrayList<>();
@@ -333,18 +350,43 @@ public class BuscaGulosa {
             int expande = expandePuzzleHeuristicaIgual.expande(phi, puzzlePercorrido, valorIgual);
             novoValorHeuristica.add(expande);
         }
-        
-        //encontra Menor valor
-        int menorValorHeuristica;
-        menorValorHeuristica = encontraMenor(novoValorHeuristica);
 
-        return menorValorHeuristica;
+        return novoValorHeuristica;
+    }
+
+    public ArrayList<Integer> substituiPeçasForaDoLugar(ArrayList<Integer> peçasForaDoLugar, int valorIgual, ArrayList<Integer> novaHeuristica) {
+        for (int pfd = 0; pfd < peçasForaDoLugar.size(); pfd++) {
+            for (Integer nh : novaHeuristica) {
+                if (peçasForaDoLugar.get(pfd) == valorIgual) {
+                    peçasForaDoLugar.remove(pfd);
+                    peçasForaDoLugar.add(nh);
+                }
+            }
+        }
+        return peçasForaDoLugar;
+    }
+
+    /*
+    Método responsável por retornar o puzzle a qual o menor valor da heuristica pertence
+     */
+    public String[][] encontraPuzzle(ArrayList<String[][]> puzzle, int menorValorHeuristica) {
+        int peçasFLugar;
+        String[][] puzzleFinal = new String[3][3];
+
+        for (String[][] p : puzzle) {
+            peçasFLugar = calculaPecasForaDoLugar(p);
+            if (peçasFLugar == menorValorHeuristica) {
+                puzzleFinal = p;
+                break;
+            }
+        }
+        return puzzleFinal;
     }
 
     /*
     Método responsável por receber uma lista de heuristica contendo alguns valores iguais e outro diferent
     Ele deve retornar esse valor diferente na lista.
-    */
+     */
     public int encontraValorDiferente(ArrayList<Integer> peçasForaDoLugar, int valorIgual) {
         int valorDiferente = valorIgual;
         for (Integer pfd : peçasForaDoLugar) {

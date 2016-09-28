@@ -194,7 +194,7 @@ public class ExpandePuzzleHeuristicaIgual {
 
         //valores da heuristica iguais
   
-
+        
         //calcula menor heurística
         menorValorHeuristica = buscaGulosa.encontraMenor(peçasForaDoLugar);
 
@@ -206,11 +206,6 @@ public class ExpandePuzzleHeuristicaIgual {
                 break;
             }
         }
-
-        if (menorValorHeuristica == valorIgual) {
-            expande(puzzleHeuristicaIgual, puzzlePercorrido, menorValorHeuristica);
-        }
-        System.out.println("menor " + menorValorHeuristica);
 
         return menorValorHeuristica;
 
