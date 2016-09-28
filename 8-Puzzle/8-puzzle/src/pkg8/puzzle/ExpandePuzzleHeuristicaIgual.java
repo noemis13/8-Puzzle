@@ -1,6 +1,5 @@
 /*
-Classe responsável por receber um puzzle e expandir todas as suas possibilidade.
-Ele deve verificar se as expansões ja foram repetidas.
+Classe responsável por expandir um puzzle no qual possui uma heuristica igual
  */
 package pkg8.puzzle;
 
@@ -11,33 +10,29 @@ import java.util.Arrays;
  *
  * @author ns
  */
-public class ExpandeFilhos {
+public class ExpandePuzzleHeuristicaIgual {
 
-    private int tamMaximoPuzzle = 3;
-
-    public ExpandeFilhos() {
+    public ExpandePuzzleHeuristicaIgual() {
     }
 
-    public int getTamMaximoPuzzle() {
-        return tamMaximoPuzzle;
-    }
-
-
-    public void expandePuzzle(String puzzle[][], ArrayList<String[][]> puzzlePercorrido) {
+    /*
+    Método que irá expandir o puzzle e encontrar um novo valor para heuristica
+     */
+    public int expande(String[][] puzzle, ArrayList<String[][]> puzzlePercorrido, int valorIgual) {
         BuscaGulosa buscaGulosa = new BuscaGulosa();
-        
+        Metodos metodos = new Metodos();
+
         String valor;
         String[][] filhoPuzzle1 = new String[3][3];
         String[][] filhoPuzzle2 = new String[3][3];
         String[][] filhoPuzzle3 = new String[3][3];
         String[][] filhoPuzzle4 = new String[3][3];
 
-                
         ArrayList<String[][]> puzzleFilhos = new ArrayList<>();
 
         //salva em cada filho e o puzzlePercorrido o puzzle atual
-        for (int i = 0; i < tamMaximoPuzzle; i++) {
-            for (int j = 0; j < tamMaximoPuzzle; j++) {
+        for (int i = 0; i < metodos.getTamMaximoPuzzle(); i++) {
+            for (int j = 0; j < metodos.getTamMaximoPuzzle(); j++) {
                 filhoPuzzle1[i][j] = puzzle[i][j];
                 filhoPuzzle2[i][j] = puzzle[i][j];
                 filhoPuzzle3[i][j] = puzzle[i][j];
@@ -45,10 +40,10 @@ public class ExpandeFilhos {
 
             }
         }
-        
+
         //expansão dos filhos
-        for (int i = 0; i < tamMaximoPuzzle; i++) {
-            for (int j = 0; j < tamMaximoPuzzle; j++) {
+        for (int i = 0; i < metodos.getTamMaximoPuzzle(); i++) {
+            for (int j = 0; j < metodos.getTamMaximoPuzzle(); j++) {
                 if (puzzle[i][j].equals("_")) {
                     //Condições para a posição do espaço vazio
                     if ((i == 0) && (j == 0)) {
@@ -157,54 +152,68 @@ public class ExpandeFilhos {
         ArrayList<String[][]> filho2 = new ArrayList<>();
         ArrayList<String[][]> filho3 = new ArrayList<>();
         ArrayList<String[][]> filho4 = new ArrayList<>();
-        
+
         filho1.add(filhoPuzzle1);
         filho2.add(filhoPuzzle2);
         filho3.add(filhoPuzzle3);
         filho4.add(filhoPuzzle4);
-        
+
         String corPuzzleFilhos1, corPuzzleFilhos2, corPuzzleFilhos3, corPuzzleFilhos4 = new String();
-        
-        corPuzzleFilhos1 = adicionaCores(filho1, puzzlePercorrido);
-        corPuzzleFilhos2 = adicionaCores(filho2, puzzlePercorrido);
-        corPuzzleFilhos3 = adicionaCores(filho3, puzzlePercorrido);
-        corPuzzleFilhos4 = adicionaCores(filho4, puzzlePercorrido);
-        
+
+        //Adiciona o puzzle expandido para puzzlePerocorrido
+        puzzlePercorrido.add(puzzle);
+
+        corPuzzleFilhos1 = metodos.adicionaCores(filho1, puzzlePercorrido);
+        corPuzzleFilhos2 = metodos.adicionaCores(filho2, puzzlePercorrido);
+        corPuzzleFilhos3 = metodos.adicionaCores(filho3, puzzlePercorrido);
+        corPuzzleFilhos4 = metodos.adicionaCores(filho4, puzzlePercorrido);
+
         //adiciona aos filhos somente valores que nao foram percorridos
-        if(corPuzzleFilhos1.equals("azul"))
+        if (corPuzzleFilhos1.equals("azul")) {
             puzzleFilhos.add(filhoPuzzle1);
-        
-        if(corPuzzleFilhos2.equals("azul"))
-            puzzleFilhos.add(filhoPuzzle2);
-        
-        if(corPuzzleFilhos3.equals("azul"))
-            puzzleFilhos.add(filhoPuzzle3);
-
-        if(corPuzzleFilhos4.equals("azul"))
-            puzzleFilhos.add(filhoPuzzle4);
-        
-        //Chama fhunção que encontra a melhor expansao
-        buscaGulosa.encontraValorHeuritica(puzzleFilhos, puzzlePercorrido);
-    }
-
-    /*
-    Método que adiciona uma cor ao filho
-    se vermelho, o filho é uma expansão que já foi feita.
-    se azul, o filho é válido.
-     */
-    public String adicionaCores(ArrayList<String[][]> filhoPuzzle, ArrayList<String[][]> puzzlePercorrido) {
-        String cor = "azul";
-
-        for (String[][] i : puzzlePercorrido) {
-            for (String[][] j: filhoPuzzle) {
-                if(Arrays.deepToString(i).equals(Arrays.deepToString(j))){
-                    cor = "vermelho";
-                }
-            }
-            
         }
-        return cor;
+        if (corPuzzleFilhos2.equals("azul")) {
+            puzzleFilhos.add(filhoPuzzle2);
+        }
+        if (corPuzzleFilhos3.equals("azul")) {
+            puzzleFilhos.add(filhoPuzzle3);
+        }
+        if (corPuzzleFilhos4.equals("azul")) {
+            puzzleFilhos.add(filhoPuzzle4);
+        }
+
+        //-------------ENCONTRA NOVA HEURISTICA---------------------
+        int menorValorHeuristica = 0, peçasFLugar;
+        ArrayList<Integer> peçasForaDoLugar = new ArrayList<>();
+        String[][] puzzleHeuristicaIgual = new String[3][3];
+
+        //calcular o valor da heuristica de cada puzzle
+        for (String[][] i : puzzleFilhos) {
+            peçasForaDoLugar.add(buscaGulosa.calculaPecasForaDoLugar(i));
+        }
+
+        //valores da heuristica iguais
+  
+
+        //calcula menor heurística
+        menorValorHeuristica = buscaGulosa.encontraMenor(peçasForaDoLugar);
+
+        //descobrir a qual matriz o menor valor pertenece
+        for (String[][] pf : puzzleFilhos) {
+            peçasFLugar = buscaGulosa.calculaPecasForaDoLugar(pf);
+            if (peçasFLugar == menorValorHeuristica) {
+                puzzleHeuristicaIgual = pf;
+                break;
+            }
+        }
+
+        if (menorValorHeuristica == valorIgual) {
+            expande(puzzleHeuristicaIgual, puzzlePercorrido, menorValorHeuristica);
+        }
+        System.out.println("menor " + menorValorHeuristica);
+
+        return menorValorHeuristica;
+
     }
-    
 
 }
