@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pkg8.puzzle;
+package HeuristicaDistanciaDeManhattan;
 
 /**
  *
  * @author ns
  */
-public class BuscaProfundidade {
+public class BuscaAStar {
     
 }

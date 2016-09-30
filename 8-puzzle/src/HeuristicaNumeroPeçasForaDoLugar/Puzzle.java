@@ -3,10 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pkg8.puzzle;
-
-import java.util.LinkedList;
-import java.util.List;
+package HeuristicaNumeroPeçasForaDoLugar;
 
 /**
  *
@@ -17,8 +14,6 @@ public class Puzzle {
     public Puzzle() {
     }
  
-    
-
     public String[][] estadoMeta(){
         String[][] puzzleMeta = new String[3][3];
         

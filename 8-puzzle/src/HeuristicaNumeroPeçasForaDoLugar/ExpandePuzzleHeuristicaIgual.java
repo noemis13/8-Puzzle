@@ -1,10 +1,10 @@
 /*
 Classe responsável por expandir um puzzle no qual possui uma heuristica igual
+Para Busca Gulosa e Busca A*
  */
-package pkg8.puzzle;
+package HeuristicaNumeroPeçasForaDoLugar;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  *
@@ -14,14 +14,69 @@ public class ExpandePuzzleHeuristicaIgual {
 
     public ExpandePuzzleHeuristicaIgual() {
     }
+  
+    /*
+    Método que irá expandir o puzzle e encontrar um novo valor para heuristica da busca Gulosa
+     */
+    public int expandeBuscaGulosa(String[][] puzzle, ArrayList<String[][]> puzzlePercorrido, int valorIgual) {
+        BuscaGulosa buscaGulosa = new BuscaGulosa();
+        
+        ArrayList<String[][]> puzzleFilhos = new ArrayList<>();
+        puzzleFilhos = expande(puzzle, puzzlePercorrido);
+        
+        //-------------ENCONTRA NOVA HEURISTICA---------------------
+        int menorValorHeuristica = 0, peçasFLugar;
+        ArrayList<Integer> heuristica = new ArrayList<>();
+        
+        //calcular o valor da heuristica de cada puzzle
+        for (String[][] i : puzzleFilhos) {
+            heuristica.add(buscaGulosa.calculaPecasForaDoLugar(i));
+        }
+
+        //calcula menor heurística
+        menorValorHeuristica = buscaGulosa.encontraMenor(heuristica);
+
+       return menorValorHeuristica;
+
+    }
+     
 
     /*
-    Método que irá expandir o puzzle e encontrar um novo valor para heuristica
+    Método que irá expandir o puzzle e encontrar um novo valor para heuristica da busca Gulosa
      */
-    public int expande(String[][] puzzle, ArrayList<String[][]> puzzlePercorrido, int valorIgual) {
-        BuscaGulosa buscaGulosa = new BuscaGulosa();
-        Metodos metodos = new Metodos();
+    public int expandeBuscaAEstrela(String[][] puzzle, ArrayList<String[][]> puzzlePercorrido, int valorIgual, int peçasForaDoLugar) {
+        BuscaAEstrela buscaAEstrela = new BuscaAEstrela();
+        
+        ArrayList<String[][]> puzzleFilhos = new ArrayList<>();
+        puzzleFilhos = expande(puzzle, puzzlePercorrido);
+        
+        //-------------ENCONTRA NOVA HEURISTICA---------------------
+        int menorValorHeuristica = 0, valorInicialPeçasForaDoLugar;
+        ArrayList<Integer> heuristica = new ArrayList<>();
+        
+        valorInicialPeçasForaDoLugar = peçasForaDoLugar;
+        //calcular o valor da heuristica de cada puzzle
+        for (String[][] i : puzzleFilhos) {
+            peçasForaDoLugar = valorInicialPeçasForaDoLugar;
+            peçasForaDoLugar = peçasForaDoLugar + buscaAEstrela.calculaPecasForaDoLugar(i);
+            heuristica.add(peçasForaDoLugar);
+        }
+      
+        //calcula menor heurística
+        menorValorHeuristica = buscaAEstrela.encontraMenor(heuristica);
 
+       return menorValorHeuristica;
+
+    }
+    
+    
+    /*
+    Expande as possibilidades
+    Retorna essas expansões
+    */
+    public ArrayList<String[][]> expande(String[][] puzzle, ArrayList<String[][]> puzzlePercorrido){
+        Metodos metodos = new Metodos();
+        
         String valor;
         String[][] filhoPuzzle1 = new String[3][3];
         String[][] filhoPuzzle2 = new String[3][3];
@@ -181,33 +236,6 @@ public class ExpandePuzzleHeuristicaIgual {
         if (corPuzzleFilhos4.equals("azul")) {
             puzzleFilhos.add(filhoPuzzle4);
         }
-
-        //-------------ENCONTRA NOVA HEURISTICA---------------------
-        int menorValorHeuristica = 0, peçasFLugar;
-        ArrayList<Integer> peçasForaDoLugar = new ArrayList<>();
-        String[][] puzzleHeuristicaIgual = new String[3][3];
-
-        //calcular o valor da heuristica de cada puzzle
-        for (String[][] i : puzzleFilhos) {
-            peçasForaDoLugar.add(buscaGulosa.calculaPecasForaDoLugar(i));
-        }
-
-        //valores da heuristica iguais
-  
-        
-        //calcula menor heurística
-        menorValorHeuristica = buscaGulosa.encontraMenor(peçasForaDoLugar);
-
-        //descobrir a qual matriz o menor valor pertenece
-        for (String[][] pf : puzzleFilhos) {
-            peçasFLugar = buscaGulosa.calculaPecasForaDoLugar(pf);
-            if (peçasFLugar == menorValorHeuristica) {
-                puzzleHeuristicaIgual = pf;
-                break;
-            }
-        }
-       return menorValorHeuristica;
-
+        return puzzleFilhos;
     }
-
 }

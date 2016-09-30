@@ -1,7 +1,7 @@
 /*
 Classe responsável por criar métodos usado pelas buscas
  */
-package pkg8.puzzle;
+package HeuristicaNumeroPeçasForaDoLugar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
