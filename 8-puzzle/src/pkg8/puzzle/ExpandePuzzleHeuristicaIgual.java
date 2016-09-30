@@ -206,8 +206,7 @@ public class ExpandePuzzleHeuristicaIgual {
                 break;
             }
         }
-
-        return menorValorHeuristica;
+       return menorValorHeuristica;
 
     }
 
