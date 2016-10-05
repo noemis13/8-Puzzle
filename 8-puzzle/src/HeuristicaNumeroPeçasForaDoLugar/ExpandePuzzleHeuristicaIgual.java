@@ -5,6 +5,9 @@ Para Busca Gulosa e Busca A*
 package HeuristicaNumeroPeçasForaDoLugar;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  *
@@ -14,69 +17,123 @@ public class ExpandePuzzleHeuristicaIgual {
 
     public ExpandePuzzleHeuristicaIgual() {
     }
-  
+
     /*
     Método que irá expandir o puzzle e encontrar um novo valor para heuristica da busca Gulosa
      */
-    public int expandeBuscaGulosa(String[][] puzzle, ArrayList<String[][]> puzzlePercorrido, int valorIgual) {
+    public int expandeBuscaGulosa(String[][] puzzle, ArrayList<String[][]> puzzlePercorrido, int valorIgual, int contExpansoesIguais) {
         BuscaGulosa buscaGulosa = new BuscaGulosa();
-        
+
         ArrayList<String[][]> puzzleFilhos = new ArrayList<>();
         puzzleFilhos = expande(puzzle, puzzlePercorrido);
-        
+
         //-------------ENCONTRA NOVA HEURISTICA---------------------
-        int menorValorHeuristica = 0, peçasFLugar;
+        int menorValorHeuristica = 0;
         ArrayList<Integer> heuristica = new ArrayList<>();
-        
+        Map<String[][], Integer> puzzleEheuristica = new HashMap<>();
+
         //calcular o valor da heuristica de cada puzzle
         for (String[][] i : puzzleFilhos) {
-            heuristica.add(buscaGulosa.calculaPecasForaDoLugar(i));
+            int calculaHeurisitca;
+            calculaHeurisitca = buscaGulosa.calculaPecasForaDoLugar(i);
+            puzzleEheuristica.put(i, calculaHeurisitca);
+            heuristica.add(calculaHeurisitca);
         }
 
         //calcula menor heurística
-        menorValorHeuristica = buscaGulosa.encontraMenor(heuristica);
+        //menorValorHeuristica = buscaGulosa.encontraMenor(heuristica);
+        
+        System.out.println("hashMap Iguais");
+        for (Map.Entry<String[][], Integer> peh: puzzleEheuristica.entrySet()) {
+            System.out.println(peh.getKey());
+            System.out.println("Heuristica: " +peh.getValue());
+        }
+        System.out.println("CONTExpansoes: " +contExpansoesIguais);
+        //Expansao IGUAL a primeiro valor
+        String[][] encontraPuzzle = new String[3][3];
+        
+        int ehIgual, valorDiferente;
+        
+        if (puzzleEheuristica.size() == 1) {
+            if (heuristica.get(0) == valorIgual) {
+                if (contExpansoesIguais <= 3) {
+                    encontraPuzzle = buscaGulosa.encontraPuzzleDaHeuristica(puzzleEheuristica, heuristica.get(0));
+                    expandeBuscaGulosa(encontraPuzzle, puzzlePercorrido, valorIgual, contExpansoesIguais);
+                } else {
+                    menorValorHeuristica = heuristica.get(0);
+                }
+            } else {
+                menorValorHeuristica = heuristica.get(0);
+            }//if
 
-       return menorValorHeuristica;
+        }else if(puzzleEheuristica.size() == 2) {
+            ehIgual = buscaGulosa.verificaIgualdadeHeuristica(heuristica);
+            if(ehIgual == 0) {
+                if(heuristica.contains(valorIgual)) {
+                    for (Integer h: heuristica) {
+                        if(h != valorIgual){
+                            menorValorHeuristica = h;
+                        }
+                    }//for
+                
+                }else {
+                    menorValorHeuristica = buscaGulosa.encontraMenor(heuristica);
+                }//inf contains               
+            }else {
+                if(ehIgual == valorIgual) {
+                    //escolher qual dos dois puzzle da heuristica igual usar para proxima expansão
+                    
+                }else {
+                    menorValorHeuristica = ehIgual;
+                }
+            }
+            
+        }
+
+        return menorValorHeuristica;
 
     }
-     
 
+
+    
     /*
-    Método que irá expandir o puzzle e encontrar um novo valor para heuristica da busca Gulosa
+    Método que irá expandir o puzzle e encontrar um novo valor para heuristica A*
      */
     public int expandeBuscaAEstrela(String[][] puzzle, ArrayList<String[][]> puzzlePercorrido, int valorIgual, int peçasForaDoLugar) {
         BuscaAEstrela buscaAEstrela = new BuscaAEstrela();
-        
+
         ArrayList<String[][]> puzzleFilhos = new ArrayList<>();
         puzzleFilhos = expande(puzzle, puzzlePercorrido);
-        
+
         //-------------ENCONTRA NOVA HEURISTICA---------------------
         int menorValorHeuristica = 0, valorInicialPeçasForaDoLugar;
+        Map<String[][], Integer> puzzleEheuristica = new HashMap<>();
         ArrayList<Integer> heuristica = new ArrayList<>();
-        
+
         valorInicialPeçasForaDoLugar = peçasForaDoLugar;
         //calcular o valor da heuristica de cada puzzle
         for (String[][] i : puzzleFilhos) {
             peçasForaDoLugar = valorInicialPeçasForaDoLugar;
-            peçasForaDoLugar = peçasForaDoLugar + buscaAEstrela.calculaPecasForaDoLugar(i);
+            peçasForaDoLugar = peçasForaDoLugar + buscaAEstrela.calculaDistanciaManhattan(i);
+            puzzleEheuristica.put(i, peçasForaDoLugar);
             heuristica.add(peçasForaDoLugar);
         }
-      
+
+         
         //calcula menor heurística
         menorValorHeuristica = buscaAEstrela.encontraMenor(heuristica);
 
-       return menorValorHeuristica;
+        return menorValorHeuristica;
 
     }
-    
-    
+
     /*
     Expande as possibilidades
     Retorna essas expansões
-    */
-    public ArrayList<String[][]> expande(String[][] puzzle, ArrayList<String[][]> puzzlePercorrido){
+     */
+    public ArrayList<String[][]> expande(String[][] puzzle, ArrayList<String[][]> puzzlePercorrido) {
         Metodos metodos = new Metodos();
-        
+
         String valor;
         String[][] filhoPuzzle1 = new String[3][3];
         String[][] filhoPuzzle2 = new String[3][3];
