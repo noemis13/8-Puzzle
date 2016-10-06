@@ -2,9 +2,10 @@
 Classe responsável por expandir um puzzle no qual possui uma heuristica igual
 Para Busca Gulosa e Busca A*
  */
-package HeuristicaNumeroPeçasForaDoLugar;
+package HeuristicaDistanciaManhattan;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -35,47 +36,44 @@ public class ExpandePuzzleHeuristicaIgual {
         //calcular o valor da heuristica de cada puzzle
         for (String[][] i : puzzleFilhos) {
             int calculaHeurisitca;
-            calculaHeurisitca = buscaGulosa.calculaPecasForaDoLugar(i);
+            calculaHeurisitca = buscaGulosa.calculaDistanciaManhattan(i);
             puzzleEheuristica.put(i, calculaHeurisitca);
             heuristica.add(calculaHeurisitca);
         }
 
         //calcula menor heurística
         menorValorHeuristica = buscaGulosa.encontraMenor(heuristica);
-        
+
         return menorValorHeuristica;
 
     }
 
-
-    
     /*
     Método que irá expandir o puzzle e encontrar um novo valor para heuristica A*
      */
-    public int expandeBuscaAEstrela(String[][] puzzle, ArrayList<String[][]> puzzlePercorrido, int valorIgual, int peçasForaDoLugar) {
+    public int expandeBuscaAEstrela(String[][] puzzle, ArrayList<String[][]> puzzlePercorrido, int peçasForaDoLugar) {
         BuscaAEstrela buscaAEstrela = new BuscaAEstrela();
-
+        Metodos metodos = new Metodos();
+        
         ArrayList<String[][]> puzzleFilhos = new ArrayList<>();
         puzzleFilhos = expande(puzzle, puzzlePercorrido);
 
         //-------------ENCONTRA NOVA HEURISTICA---------------------
         int menorValorHeuristica = 0, valorInicialPeçasForaDoLugar;
-        Map<String[][], Integer> puzzleEheuristica = new HashMap<>();
         ArrayList<Integer> heuristica = new ArrayList<>();
 
         valorInicialPeçasForaDoLugar = peçasForaDoLugar;
         //calcular o valor da heuristica de cada puzzle
         for (String[][] i : puzzleFilhos) {
             peçasForaDoLugar = valorInicialPeçasForaDoLugar;
-            peçasForaDoLugar = peçasForaDoLugar + buscaAEstrela.calculaDistanciaManhattan(i);
-            puzzleEheuristica.put(i, peçasForaDoLugar);
+            peçasForaDoLugar = peçasForaDoLugar + metodos.calculaDistanciaManhattan(i);
             heuristica.add(peçasForaDoLugar);
-        }
-
-         
+       }
+        
+        System.out.println("Heuristica:  "+heuristica); 
         //calcula menor heurística
-        menorValorHeuristica = buscaAEstrela.encontraMenor(heuristica);
-
+        menorValorHeuristica = metodos.encontraMenor(heuristica);
+        
         return menorValorHeuristica;
 
     }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package HeuristicaNumeroPeçasForaDoLugar;
+package HeuristicaDistanciaManhattan;
 
 /**
  *
@@ -31,7 +31,7 @@ public class Puzzle {
                 
         return puzzleMeta;
     }
-    public String[][] puzzleInicio(){
+    public static String[][] puzzleInicio(){
         String[][] puzzleIni = new String[3][3];
         puzzleIni[0][0] = "2";
         puzzleIni[0][1] = "3";

@@ -1,4 +1,4 @@
-package HeuristicaNumeroPeçasForaDoLugar;
+package HeuristicaDistanciaEuclidiana;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,31 +10,30 @@ import java.util.Objects;
  *
  * @author ns
  */
-public class BuscaGulosa {
-    
-    public BuscaGulosa() {
-    }
- 
+public class AEstrela {
 
+    public AEstrela() {
+    }
+    
     public static void main(String[] args) {
         Puzzle puzz = new Puzzle();
 
         String[][] puzzleIni = new String[3][3];
         puzzleIni = puzz.puzzleInicio();
+        double peçasForaDoLugar = 0.0;
+        int quantidadeExpansoes = 0;
 
         ArrayList<String[][]> puzzlePercorrido = new ArrayList<>();
         puzzlePercorrido.add(puzzleIni);
 
-        int quantidadeExpansoes = 0;
-        expandePuzzle(puzzleIni, puzzlePercorrido, quantidadeExpansoes);
+        expandePuzzle(puzzleIni, puzzlePercorrido, peçasForaDoLugar, quantidadeExpansoes);
     }
 
     /*
-    responsável por receber um puzzle e expandir todas as suas possibilidade.
+    Método responsável por receber um puzzle e expandir todas as suas possibilidade.
     Ele deve verificar se as expansões ja foram repetidas.
      */
-    public static void expandePuzzle(String puzzle[][], ArrayList<String[][]> puzzlePercorrido, int quantidadeExpansoes) {
-        BuscaGulosa buscaGulosa = new BuscaGulosa();
+    public static void expandePuzzle(String puzzle[][], ArrayList<String[][]> puzzlePercorrido, double peçasForaDoLugar, int quantidadeExpansoes) {
         Metodos metodos = new Metodos();
 
         String valor;
@@ -198,226 +197,145 @@ public class BuscaGulosa {
         }
 
         //Chama fhunção que encontra a melhor expansao
-        buscaGulosa.encontraValorHeuritica(puzzleFilhos, puzzlePercorrido, quantidadeExpansoes);
+        AEstrela aEstrela = new AEstrela();
+        aEstrela.encontraValorHeuritica(puzzleFilhos, puzzlePercorrido, peçasForaDoLugar, quantidadeExpansoes);
     }
 
     /*Método responsável por receber uma lista contendo uma
     expasão do puzzle e encontrar qual é a melhor expansão para se usar
      */
-    public void encontraValorHeuritica(ArrayList<String[][]> puzzleFilhos, ArrayList<String[][]> puzzlePercorrido, int quantidadeExpansoes) {
+    public void encontraValorHeuritica(ArrayList<String[][]> puzzleFilhos, ArrayList<String[][]> puzzlePercorrido, double peçasForaDoLugar, int quantidadeExpansoes) {
         Metodos metodos = new Metodos();
         ExpandePuzzleHeuristicaIgual expandePuzzleHeuristicaIgual = new ExpandePuzzleHeuristicaIgual();
 
-        int menorValorHeuristica = 0, contExpansoesIguais = 0;
+        double menorValorHeuristica = 0.0, valorPeçasForaDoLugar;
         String[][] puzzle = new String[3][3];
 
-        int peçasForaDoLugar;
-        Map<String[][], Integer> puzzleEheuristica = new HashMap<>();
-        Map<String[][], Integer> puzzleEheuristicaIguais = new HashMap<>();
+        Map<String[][], Double> puzzleEheuristica = new HashMap<>();
+        Map<String[][], Double> puzzleEheuristicaIguais = new HashMap<>();
 
-        ArrayList<Integer> heuristica = new ArrayList<>();
-        ArrayList<Integer> heuristicasIguais = new ArrayList<>();
+        ArrayList<Double> heuristica = new ArrayList<>();
+        ArrayList<Double> heuristicasIguais = new ArrayList<>();
 
+        valorPeçasForaDoLugar = peçasForaDoLugar;
         //calcular o valor da heuristica de cada puzzle
         for (String[][] i : puzzleFilhos) {
-            peçasForaDoLugar = calculaPecasForaDoLugar(i);
+            peçasForaDoLugar = valorPeçasForaDoLugar;
+            peçasForaDoLugar = peçasForaDoLugar + metodos.calculaDistanciaEuclidiana(i);
             puzzleEheuristica.put(i, peçasForaDoLugar);
             heuristica.add(peçasForaDoLugar);
         }
 
-        for (Map.Entry<String[][], Integer> peh : puzzleEheuristica.entrySet()){
-            System.out.println(Arrays.deepToString(peh.getKey()));
-            System.out.println("Heuristica: "+peh.getValue());
-        }
-        
         //-------------------------------------------------------------------------
         //valores da heuristica iguais
-        int ehHeuristicaIgual;
-        
+        double ehHeuristicaIgual;
+
         if (puzzleEheuristica.size() == 1) {
-            for (Map.Entry<String[][], Integer> peh : puzzleEheuristica.entrySet()) {
+            for (Map.Entry<String[][], Double> peh : puzzleEheuristica.entrySet()) {
                 menorValorHeuristica = peh.getValue();
                 puzzle = peh.getKey();
             }
 
         } else if (puzzleEheuristica.size() == 2) {
-            ehHeuristicaIgual = verificaIgualdadeHeuristica(heuristica);
-           
+            ehHeuristicaIgual = metodos.verificaIgualdadeHeuristica(heuristica);
             if (ehHeuristicaIgual == 0) {
-                menorValorHeuristica = encontraMenor(heuristica);
-                puzzle = encontraPuzzleDaHeuristica(puzzleEheuristica, menorValorHeuristica);
+                menorValorHeuristica = metodos.encontraMenor(heuristica);
+                puzzle = metodos.encontraPuzzleDaHeuristica(puzzleEheuristica, menorValorHeuristica);
 
             } else {
-                for (Map.Entry<String[][], Integer> peh : puzzleEheuristica.entrySet()) {
+                for (Map.Entry<String[][], Double> peh : puzzleEheuristica.entrySet()) {
                     if (peh.getValue() == ehHeuristicaIgual) {
-                        int novoValor;
-                        novoValor = expandePuzzleHeuristicaIgual.expandeBuscaGulosa(peh.getKey(), puzzlePercorrido, ehHeuristicaIgual, contExpansoesIguais);
+                       double novoValor;
+                        valorPeçasForaDoLugar = ehHeuristicaIgual;
+                        novoValor = expandePuzzleHeuristicaIgual.expandeBuscaAEstrela(peh.getKey(), puzzlePercorrido, valorPeçasForaDoLugar);
                         puzzleEheuristicaIguais.put(peh.getKey(), novoValor);
                         heuristicasIguais.add(novoValor);
-                    }
-                }//for                   
+                        
+                        System.out.println("NOVO VALOR: " +novoValor);
                     
-                menorValorHeuristica = encontraMenor(heuristicasIguais);
-                for (Map.Entry<String[][], Integer> pehi : puzzleEheuristicaIguais.entrySet()) {
+                    }
+                }
+                menorValorHeuristica = metodos.encontraMenor(heuristicasIguais);
+
+                for (Map.Entry<String[][], Double> pehi : puzzleEheuristicaIguais.entrySet()) {
                     if (pehi.getValue() == menorValorHeuristica) {
                         puzzle = pehi.getKey();
                     }
                 }
+                menorValorHeuristica = ehHeuristicaIgual;
             }//else
 
         } else {
-            ehHeuristicaIgual = verificaIgualdadeHeuristica(heuristica);
-            if(ehHeuristicaIgual == 0) {
-                menorValorHeuristica = encontraMenor(heuristica);
-                puzzle = encontraPuzzleDaHeuristica(puzzleEheuristica, menorValorHeuristica);
-            
-            }else {
-                int menor = encontraMenor(heuristica);
-                if(menor != ehHeuristicaIgual) {
-                    menorValorHeuristica = menor;
-                    puzzle = encontraPuzzleDaHeuristica(puzzleEheuristica, menorValorHeuristica);
-                
-                }else {
-                    
-                    for (Map.Entry<String[][], Integer> pehi : puzzleEheuristica.entrySet()) {
-                        if(pehi.getValue() == ehHeuristicaIgual){
-                           
-                            int novoValorHeuristica;
-                            novoValorHeuristica = expandePuzzleHeuristicaIgual.expandeBuscaGulosa(pehi.getKey(), puzzlePercorrido, ehHeuristicaIgual, contExpansoesIguais);
-                            puzzleEheuristicaIguais.put(pehi.getKey(), novoValorHeuristica);
-                            heuristicasIguais.add(novoValorHeuristica);
-                     
-                        
-                        }else{
-                            puzzleEheuristicaIguais.put(pehi.getKey(), pehi.getValue());
-                            heuristicasIguais.add(pehi.getValue());
-                           
+            ehHeuristicaIgual = metodos.verificaIgualdadeHeuristica(heuristica);
+            if (ehHeuristicaIgual == 0) {
+                menorValorHeuristica = metodos.encontraMenor(heuristica);
+                puzzle = metodos.encontraPuzzleDaHeuristica(puzzleEheuristica, menorValorHeuristica);
+
+            } else {
+                double valorDiferente = metodos.encontraValorDiferente(heuristica, ehHeuristicaIgual);
+               
+                if (valorDiferente < ehHeuristicaIgual) {
+                    menorValorHeuristica = valorDiferente;
+                    puzzle = metodos.encontraPuzzleDaHeuristica(puzzleEheuristica, menorValorHeuristica);
+
+                } else {
+                    //expande
+                    for (Map.Entry<String[][], Double> peh : puzzleEheuristica.entrySet()) {
+                        if (peh.getValue() == ehHeuristicaIgual) {
+                            double novoValor;
+                            valorPeçasForaDoLugar = ehHeuristicaIgual;
+
+                            novoValor = expandePuzzleHeuristicaIgual.expandeBuscaAEstrela(peh.getKey(), puzzlePercorrido, valorPeçasForaDoLugar);
+                            puzzleEheuristicaIguais.put(peh.getKey(), novoValor);
+                            heuristicasIguais.add(novoValor);
+                            
+                            System.out.println("NOVO VALOR: " +novoValor);
+                            
+                        } else {
+                            puzzleEheuristicaIguais.put(peh.getKey(), peh.getValue());
+                            heuristicasIguais.add(peh.getValue());
                         }
                     }//for
-                    menorValorHeuristica = encontraMenor(heuristicasIguais);
-                    puzzle = encontraPuzzleDaHeuristica(puzzleEheuristicaIguais, menorValorHeuristica);
                     
+                    menorValorHeuristica = metodos.encontraMenor(heuristicasIguais);
+                    for (Map.Entry<String[][], Double> pehi : puzzleEheuristicaIguais.entrySet()) {
+                        if (pehi.getValue() == menorValorHeuristica) {
+                            puzzle = pehi.getKey();
+                        }
+                    }
+                    if(menorValorHeuristica != valorDiferente) 
+                        menorValorHeuristica = ehHeuristicaIgual;
+
                 }//else
-            }
-            
+
+            }//else heuristicas iguais
         }//fim das comparações
 
         //-------------------------------------------------------------------------
         //adiciona o que ja foi percorrido;
         puzzlePercorrido.add(puzzle);
 
+        //Atualiza o valor de h
+        peçasForaDoLugar = menorValorHeuristica;
+
         quantidadeExpansoes = quantidadeExpansoes + 1;
         //verifica se o puzzle é o meta, se não expande novamente os filhos e 
         int ehPuzzleFInal;
         ehPuzzleFInal = metodos.comparaPuzzleFinal(puzzle);
-            
+
         if (ehPuzzleFInal == 0) {
+            System.out.println("Quantidade de expansoes: " + quantidadeExpansoes);
             metodos.imprimePuzzle(puzzle);
             System.out.println("valor heuristica: " + menorValorHeuristica);
             System.out.println("\n");
-            System.out.println("Quantidade de expansoes: "+quantidadeExpansoes);
-            expandePuzzle(puzzle, puzzlePercorrido, quantidadeExpansoes);
-            
+            expandePuzzle(puzzle, puzzlePercorrido, peçasForaDoLugar, quantidadeExpansoes);
+
         } else {
             System.out.println("Puzzle final obtido! ");
-            metodos.imprimePuzzle(puzzle);     
+            metodos.imprimePuzzle(puzzle);
             System.out.println("\n");
         }
     }
 
-    /*
-    Método responsável por varificar se os valores das heuristicas são iguais
-     */
-    public int verificaIgualdadeHeuristica(ArrayList<Integer> heuristica) {
-        int tamHeuristica = heuristica.size();
-        int valorIgual = 0; //nao igual
-        
-        for (int h = 0; h < heuristica.size(); h++) {
-            if ((h + 1) < tamHeuristica) {
-                if (Objects.equals(heuristica.get(h), heuristica.get(h + 1))) {
-                    valorIgual = heuristica.get(h); //armazena qual valor igual é
-                }
-            }
-        }
-        
-        if(valorIgual == 0 && tamHeuristica >= 3){
-            valorIgual = heuristica.get(0);
-            for (int h = 1; h < heuristica.size(); h++){
-                if(heuristica.get(h) == valorIgual) {
-                    valorIgual = heuristica.get(h);
-                }else {
-                    valorIgual = 0;
-                }
-            }
-        }
-        return valorIgual;
-    }
-
-
-    /*
-    Método responsável por encontrar puzzle da menor heuristica
-     */
-    public String[][] encontraPuzzleDaHeuristica(Map<String[][], Integer> puzzleEheuristica, int menorValorHeuristica) {
-        String[][] puzzle = new String[3][3];
-
-        for (Map.Entry<String[][], Integer> peh : puzzleEheuristica.entrySet()) {
-            if (peh.getValue() == menorValorHeuristica) {
-                puzzle = peh.getKey();
-            }
-        }
-
-        return puzzle;
-    }
-
-    /*
-    Método responsável por receber heuristicas com valores iguas e um diferente
-    retornar esse valor diferente
-     */
-    public int encontraValorDiferente(ArrayList<Integer> heuristica, int ehHeuristicaIgual) {
-        int valorDiferente = ehHeuristicaIgual;
-        for (Integer h : heuristica) {
-            if (h != ehHeuristicaIgual) {
-                valorDiferente = h;
-            }
-        }
-        
-        return valorDiferente;
-    }
-
-    /*método responsável por receber uma expansão (filho) do puzzle,
-    calcular a quantidade de peças fora do lugar */
-    public int calculaPecasForaDoLugar(String[][] puzzle) {
-        Metodos metodos = new Metodos();
-
-        String[][] puzzleMeta = new String[3][3];
-        puzzleMeta = metodos.referenciaPuzzleMeta();
-        int peçasForaDoLugar = 0;
-        String valor;
-        int[] posCorreta = new int[2];
-
-        for (int i = 0; i < metodos.getTamMaximoPuzzle(); i++) {
-            for (int j = 0; j < metodos.getTamMaximoPuzzle(); j++) {
-                if (!puzzle[i][j].equals("_")) {
-                    if (!puzzle[i][j].equals(puzzleMeta[i][j])) {
-                        peçasForaDoLugar = peçasForaDoLugar + 1;
-                    }
-                }
-            }
-        }
-        return peçasForaDoLugar;
-    }
-
-    /*Método responsável por encontrar o menor valor
-    utilizando a heurística de peças fora do lugar,
-     */
-    public int encontraMenor(ArrayList<Integer> heuristica) {
-        int menorValor = 10000000;
-        for (Integer pfd : heuristica) {
-            if (pfd < menorValor) {
-                menorValor = pfd;
-            }
-        }
-        return menorValor;
-    }
-
+    
 }
