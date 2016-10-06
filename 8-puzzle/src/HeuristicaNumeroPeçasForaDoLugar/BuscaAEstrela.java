@@ -218,8 +218,6 @@ public class BuscaAEstrela {
         ArrayList<Integer> heuristicasIguais = new ArrayList<>();
 
         valorPeçasForaDoLugar = peçasForaDoLugar;
-        System.out.println("VALOR PEÇAS: " + valorPeçasForaDoLugar);
-        System.out.println("PEÇAS: " + peçasForaDoLugar);
         //calcular o valor da heuristica de cada puzzle
         for (String[][] i : puzzleFilhos) {
             peçasForaDoLugar = valorPeçasForaDoLugar;
@@ -343,38 +341,37 @@ public class BuscaAEstrela {
         String[][] puzzleMeta = new String[3][3];
         puzzleMeta = metodos.referenciaPuzzleMeta();
 
-        int peçasForaDoLugar = 0, posi = 1, posj = 0;
-        String valorMeta, valorPuzzle;
-        boolean achou = false;
+        int peçasForaDoLugar = 0;
         
-
+        for (int i = 0; i < metodos.getTamMaximoPuzzle(); i++) {
+            for (int j = 0; j < metodos.getTamMaximoPuzzle(); j++) {
+                if(!puzzle[i][j].equals("_")) {
+                    if(puzzle[i][j].equals(puzzleMeta[i][j])) {
+                        peçasForaDoLugar = peçasForaDoLugar + 0;
+                    
+                    }else{
+                        for (int k = 0; k < metodos.getTamMaximoPuzzle(); k++) {
+                            for (int l = 0; l < metodos.getTamMaximoPuzzle(); l++) {
+                                if(puzzleMeta[k][l].equals(puzzle[i][j])) {
+                                    int valor1 = 0, valor2, subtraiQuadrado;
+                                    valor1 = i - k;
+                                    valor2 = j - l;
+                                    subtraiQuadrado = (int) (Math.pow(valor1, 2) + Math.pow(valor2, 2));
+                                    peçasForaDoLugar = (int) (peçasForaDoLugar + Math.sqrt(subtraiQuadrado));
+                                    break;
+                                }
+                            }//for
+                        }//for
+                    
+                    }
+                }
+            }//for
+        }//for
+        
+        System.out.println("PEÇAS: "+peçasForaDoLugar);
         return peçasForaDoLugar;
     }
 
-    /*public int calculaPecasForaDoLugar(String[][] puzzle) {
-        Metodos metodos =or (int i = 0; i < metodos.getTamMaximoPuzzle(); i++) {
-            for (int j = 0; j < metodos.getTamMaximoPuzzle(); j++) {
-                
-            }
-        } new Metodos();
-
-        String[][] puzzleMeta = new String[3][3];
-        puzzleMeta = metodos.referenciaPuzzleMeta();
-        int peçasForaDoLugar = 0;
-        String valor;
-        int[] posCorreta = new int[2];
-
-        for (int i = 0; i < metodos.getTamMaximoPuzzle(); i++) {
-            for (int j = 0; j < metodos.getTamMaximoPuzzle(); j++) {
-                if (!puzzle[i][j].equals("_")) {
-                    if (!puzzle[i][j].equals(puzzleMeta[i][j])) {
-                        peçasForaDoLugar = peçasForaDoLugar + 1;
-                    }
-                }
-            }
-        }
-        return peçasForaDoLugar;
-    }*/
 
  /*
     Método responsável por varificar se os valores das heuristicas são iguais

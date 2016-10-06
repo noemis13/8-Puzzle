@@ -41,55 +41,8 @@ public class ExpandePuzzleHeuristicaIgual {
         }
 
         //calcula menor heurística
-        //menorValorHeuristica = buscaGulosa.encontraMenor(heuristica);
+        menorValorHeuristica = buscaGulosa.encontraMenor(heuristica);
         
-        System.out.println("hashMap Iguais");
-        for (Map.Entry<String[][], Integer> peh: puzzleEheuristica.entrySet()) {
-            System.out.println(peh.getKey());
-            System.out.println("Heuristica: " +peh.getValue());
-        }
-        System.out.println("CONTExpansoes: " +contExpansoesIguais);
-        //Expansao IGUAL a primeiro valor
-        String[][] encontraPuzzle = new String[3][3];
-        
-        int ehIgual, valorDiferente;
-        
-        if (puzzleEheuristica.size() == 1) {
-            if (heuristica.get(0) == valorIgual) {
-                if (contExpansoesIguais <= 3) {
-                    encontraPuzzle = buscaGulosa.encontraPuzzleDaHeuristica(puzzleEheuristica, heuristica.get(0));
-                    expandeBuscaGulosa(encontraPuzzle, puzzlePercorrido, valorIgual, contExpansoesIguais);
-                } else {
-                    menorValorHeuristica = heuristica.get(0);
-                }
-            } else {
-                menorValorHeuristica = heuristica.get(0);
-            }//if
-
-        }else if(puzzleEheuristica.size() == 2) {
-            ehIgual = buscaGulosa.verificaIgualdadeHeuristica(heuristica);
-            if(ehIgual == 0) {
-                if(heuristica.contains(valorIgual)) {
-                    for (Integer h: heuristica) {
-                        if(h != valorIgual){
-                            menorValorHeuristica = h;
-                        }
-                    }//for
-                
-                }else {
-                    menorValorHeuristica = buscaGulosa.encontraMenor(heuristica);
-                }//inf contains               
-            }else {
-                if(ehIgual == valorIgual) {
-                    //escolher qual dos dois puzzle da heuristica igual usar para proxima expansão
-                    
-                }else {
-                    menorValorHeuristica = ehIgual;
-                }
-            }
-            
-        }
-
         return menorValorHeuristica;
 
     }
